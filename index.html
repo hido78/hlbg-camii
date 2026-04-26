@@ -60,15 +60,11 @@
         .logo-area img { height: 120px; }
         .logo-area h1 { font-size: 3.8rem; color: var(--primary); font-weight: 800; letter-spacing: -1px; }
 
-        .header-right-group {
-            display: flex;
-            align-items: center;
-            gap: 40px;
-        }
+        .header-right-group { display: flex; align-items: center; gap: 40px; }
 
         .date-area { text-align: right; }
         .date-area .miladi { font-size: 1.6rem; font-weight: bold; }
-        .date-area .hicri { color: var(--primary); font-size: 1.4rem; font-weight: 600; margin-top: 5px; }
+        .date-area .hicri  { color: var(--primary); font-size: 1.4rem; font-weight: 600; margin-top: 5px; }
 
         .live-clock {
             font-size: 5rem;
@@ -109,7 +105,7 @@
         }
 
         .vakit-card .label { font-size: 1.8rem; text-transform: uppercase; margin-bottom: 15px; font-weight: 700; opacity: 0.9; }
-        .vakit-card .time { font-size: 4rem; font-weight: 800; }
+        .vakit-card .time  { font-size: 4rem; font-weight: 800; }
 
         .countdown-box {
             background: #e0f2f1;
@@ -120,12 +116,8 @@
             align-items: center;
             padding: 30px;
         }
-        
-        #status-display {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-        }
+
+        #status-display { font-size: 2rem; font-weight: 700; text-align: center; }
 
         .countdown-timer {
             font-size: 5.5rem;
@@ -151,16 +143,16 @@
         .weather-main { text-align: center; }
         .weather-main .temp { font-size: 4.8rem; font-weight: bold; color: var(--primary); margin: 5px 0; }
         #w-desc { font-size: 1.6rem; font-weight: 600; color: #555; text-transform: capitalize; }
-        
-        .weather-details { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
             font-size: 1.3rem;
             border-left: 2px solid #eee;
             padding-left: 30px;
         }
-        
+
         .w-item { display: flex; flex-direction: column; gap: 5px; }
         .w-item span:first-child { font-weight: bold; color: #777; }
     </style>
@@ -173,214 +165,308 @@
             <img src="https://upload.wikimedia.org/wikipedia/de/6/62/DITIB-Logo.svg" alt="DİTİB">
             <h1>Hohenlimburg Camii</h1>
         </div>
-        
         <div class="header-right-group">
             <div class="date-area">
                 <div class="miladi" id="miladi-date">-- --- ----</div>
-                <div class="hicri" id="hicri-date">-- --- ----</div>
+                <div class="hicri"  id="hicri-date">-- --- ----</div>
             </div>
             <div class="live-clock" id="clock">00:00</div>
         </div>
     </header>
 
-    <div class="vakitler-grid" id="vakitler-container">
-        <div class="vakit-card"><div class="label">İmsak</div><div class="time" id="t0">--:--</div></div>
-        <div class="vakit-card"><div class="label">Güneş</div><div class="time" id="t1">--:--</div></div>
-        <div class="vakit-card"><div class="label">Öğle</div><div class="time" id="t2">--:--</div></div>
+    <div class="vakitler-grid">
+        <div class="vakit-card"><div class="label">İmsak</div> <div class="time" id="t0">--:--</div></div>
+        <div class="vakit-card"><div class="label">Güneş</div> <div class="time" id="t1">--:--</div></div>
+        <div class="vakit-card"><div class="label">Öğle</div>  <div class="time" id="t2">--:--</div></div>
         <div class="vakit-card"><div class="label">İkindi</div><div class="time" id="t3">--:--</div></div>
-        <div class="vakit-card"><div class="label">Akşam</div><div class="time" id="t4">--:--</div></div>
-        <div class="vakit-card"><div class="label">Yatsı</div><div class="time" id="t5">--:--</div></div>
+        <div class="vakit-card"><div class="label">Akşam</div> <div class="time" id="t4">--:--</div></div>
+        <div class="vakit-card"><div class="label">Yatsı</div> <div class="time" id="t5">--:--</div></div>
     </div>
 
-    <div class="countdown-box" id="status-display">
-        Yükleniyor...
+    <div class="countdown-box">
+        <div id="status-display">Yükleniyor...</div>
     </div>
 
     <div class="weather-box">
         <div class="weather-main">
-            <div style="font-size: 1.5rem; font-weight: 600;">Hava Durumu</div>
+            <div style="font-size:1.5rem;font-weight:600;">Hava Durumu</div>
             <div class="temp" id="w-temp">--°C</div>
             <div id="w-desc">--</div>
         </div>
         <div class="weather-details">
             <div class="w-item"><span>Hissedilen</span><span id="w-feel">--°C</span></div>
-            <div class="w-item"><span>Nem</span><span id="w-hum">%--</span></div>
-            <div class="w-item"><span>Rüzgar</span><span id="w-wind">-- km/sa</span></div>
-            <div class="w-item"><span>Basınç</span><span id="w-pres">-- hPa</span></div>
+            <div class="w-item"><span>Nem</span>       <span id="w-hum">%--</span></div>
+            <div class="w-item"><span>Rüzgar</span>    <span id="w-wind">-- km/sa</span></div>
+            <div class="w-item"><span>Basınç</span>    <span id="w-pres">-- hPa</span></div>
         </div>
     </div>
 </div>
 
 <script>
-    const LAT = 51.3508;
-    const LON = 7.5683;
-    const PRAYER_API_BASE = 'https://ezanvakti.imsakiyem.com/api';
-    const DISTRICT_NAME = 'hohenlimburg';
-    const DISTRICT_ID_FALLBACK = '10028';
-    const PRAYER_CACHE_KEY = 'prayer-times-v2';
-    const PRAYER_CACHE_MAX_AGE_MS = 36 * 60 * 60 * 1000;
-    
-    let prayers = [];
-    const vakitNames = ["İmsak", "Güneş", "Öğle", "İkindi", "Akşam", "Yatsı"];
+// ── Sabitler ──────────────────────────────────────────────────────
+const LAT = 51.3508, LON = 7.5683;
+const CITY_ID = 10028;
+const BASE  = 'https://awqatsalah.diyanet.gov.tr';
+const EMAIL = 'kahraman.atmaca@hotmail.de';
+const PASS  = '7bF+M9#j';
 
-    function normalizeTime(raw) {
-        if (!raw || typeof raw !== 'string') return null;
-        const match = raw.match(/\d{1,2}:\d{2}/);
-        if (!match) return null;
-        const [h, m] = match[0].split(':').map(Number);
-        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-    }
+const TOKEN_KEY   = 'diy-token-v1';
+const PRAYER_KEY  = 'diy-prayer-v6';
+const PRAYER_TTL  = 12 * 60 * 60 * 1000;
+const WEATHER_KEY = 'diy-weather-v1';
+const WEATHER_TTL = 15 * 60 * 1000; // 15 dakika
 
-    function extractPrayerTimesFromApi(payload) {
-        const t = payload?.data?.[0]?.times;
-        if (!t) return null;
-        const mapped = [
-            normalizeTime(t.imsak), normalizeTime(t.gunes), normalizeTime(t.ogle),
-            normalizeTime(t.ikindi), normalizeTime(t.aksam), normalizeTime(t.yatsi)
-        ];
-        return mapped.every(Boolean) ? mapped : null;
-    }
+const vakitNames = ['İmsak', 'Güneş', 'Öğle', 'İkindi', 'Akşam', 'Yatsı'];
+let prayers = [];
 
-    async function fetchJsonWithTimeout(url, timeoutMs = 9000) {
-        const ctl = new AbortController();
-        const timer = setTimeout(() => ctl.abort(), timeoutMs);
+// ── Token ─────────────────────────────────────────────────────────
+function saveToken(tok) {
+    try { localStorage.setItem(TOKEN_KEY, JSON.stringify({ ...tok, at: Date.now() })); } catch(_) {}
+}
+function cachedToken() {
+    try {
+        const r = JSON.parse(localStorage.getItem(TOKEN_KEY));
+        if (!r?.accessToken) return null;
+        if (Date.now() - r.at > 55 * 60 * 1000) return null;
+        return r;
+    } catch(_) { return null; }
+}
+
+async function login() {
+    const res = await fetch(`${BASE}/Auth/Login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email: EMAIL, password: PASS })
+    });
+    if (!res.ok) throw new Error('Login HTTP ' + res.status);
+    const d = await res.json();
+    const tok = {
+        accessToken:  d?.data?.accessToken  ?? d?.accessToken,
+        refreshToken: d?.data?.refreshToken ?? d?.refreshToken
+    };
+    if (!tok.accessToken) throw new Error('Token alınamadı');
+    saveToken(tok);
+    return tok;
+}
+
+async function doRefresh(rt) {
+    const res = await fetch(`${BASE}/Auth/RefreshToken/${encodeURIComponent(rt)}`, {
+        headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('Refresh HTTP ' + res.status);
+    const d = await res.json();
+    const tok = {
+        accessToken:  d?.data?.accessToken  ?? d?.accessToken,
+        refreshToken: d?.data?.refreshToken ?? d?.refreshToken ?? rt
+    };
+    if (!tok.accessToken) throw new Error('Refresh token yok');
+    saveToken(tok);
+    return tok;
+}
+
+async function getToken() {
+    const c = cachedToken();
+    if (c) return c;
+    try {
+        const raw = JSON.parse(localStorage.getItem(TOKEN_KEY));
+        if (raw?.refreshToken) return await doRefresh(raw.refreshToken);
+    } catch(_) {}
+    return await login();
+}
+
+// ── HH:MM normalize ───────────────────────────────────────────────
+function hhmm(v) {
+    if (!v) return null;
+    const m = String(v).match(/(\d{1,2}):(\d{2})/);
+    return m ? `${m[1].padStart(2,'0')}:${m[2]}` : null;
+}
+
+// ── Namaz vakitleri cache ─────────────────────────────────────────
+function savePrayer(data) {
+    try { localStorage.setItem(PRAYER_KEY, JSON.stringify({ ...data, at: Date.now() })); } catch(_) {}
+}
+
+// ── API'den çek ───────────────────────────────────────────────────
+async function fetchPrayer() {
+    const tok = await getToken();
+    const res = await fetch(`${BASE}/api/PrayerTime/Daily/${CITY_ID}`, {
+        headers: {
+            'Authorization': `Bearer ${tok.accessToken}`,
+            'Accept': 'application/json'
+        }
+    });
+    if (!res.ok) throw new Error('PrayerTime HTTP ' + res.status);
+    const data = await res.json();
+
+    // Yanıt yapısı: { data: [ { fajr, sunrise, dhuhr, asr, maghrib, isha,
+    //                           hijriDateLong, gregorianDateLong, ... } ] }
+    const payload = data?.data ?? data;
+    const d = Array.isArray(payload) ? payload[0] : payload;
+
+    const times = [
+        hhmm(d.fajr),
+        hhmm(d.sunrise),
+        hhmm(d.dhuhr),
+        hhmm(d.asr),
+        hhmm(d.maghrib),
+        hhmm(d.isha)
+    ];
+    if (times.some(t => !t)) throw new Error('Eksik vakit alanı');
+
+    // Hicri: "9 Zilkade 1447"
+    const hijri = d.hijriDateLong ?? d.hijriDateShort ?? '';
+
+    // Miladi: "26 Nisan 2026 Pazar" — API'den gelen uzun format
+    const miladi = d.gregorianDateLong ?? '';
+
+    // Cache doğrulaması için kısa format
+    const gregorianShort = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'numeric', year:'numeric' });
+
+    savePrayer({ times, hijri, miladi, gregorianShort });
+    return { times, hijri, miladi };
+}
+
+async function loadData() {
+    // Her zaman önce API'yi dene
+    try {
+        const r = await fetchPrayer();
+        prayers = r.times;
+        renderAll(r.hijri, r.miladi);
+    } catch(e) {
+        console.error('Vakit yükleme hatası:', e.message);
+        // API başarısız olursa cache'e bak (eski tarih olsa bile göster)
         try {
-            const res = await fetch(url, { signal: ctl.signal, cache: 'no-store' });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return await res.json();
-        } finally { clearTimeout(timer); }
-    }
-
-    async function resolveDistrictId() {
-        try {
-            const payload = await fetchJsonWithTimeout(`${PRAYER_API_BASE}/locations/search/districts?q=${encodeURIComponent(DISTRICT_NAME)}`);
-            const first = payload?.data?.[0];
-            if (first?._id) return String(first._id);
-        } catch (_) {}
-        return DISTRICT_ID_FALLBACK;
-    }
-
-    function savePrayerCache(times) {
-        try { localStorage.setItem(PRAYER_CACHE_KEY, JSON.stringify({ times, savedAt: Date.now() })); } catch (_) {}
-    }
-
-    function loadPrayerCache() {
-        try {
-            const raw = localStorage.getItem(PRAYER_CACHE_KEY);
-            if (!raw) return null;
-            const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed?.times) || parsed.times.length !== 6) return null;
-            if (!parsed.savedAt || (Date.now() - parsed.savedAt) > PRAYER_CACHE_MAX_AGE_MS) return null;
-            return parsed.times;
-        } catch (_) { return null; }
-    }
-
-    async function loadData() {
-        try {
-            const districtId = await resolveDistrictId();
-            const payload = await fetchJsonWithTimeout(`${PRAYER_API_BASE}/prayer-times/${districtId}/daily`);
-            const extracted = extractPrayerTimesFromApi(payload);
-            if (!extracted) throw new Error('Format hatası');
-            prayers = extracted;
-            renderTimes();
-            savePrayerCache(prayers);
-        } catch (e) {
-            const cached = loadPrayerCache();
-            if (cached) { prayers = cached; renderTimes(); }
+            const raw = localStorage.getItem(PRAYER_KEY);
+            if (raw) {
+                const c = JSON.parse(raw);
+                if (c?.times?.length === 6) {
+                    prayers = c.times;
+                    renderAll(c.hijri, c.miladi);
+                }
+            }
+        } catch(_) {
+            document.getElementById('status-display').innerHTML =
+                `<span style="color:#c00;font-size:1.3rem">⚠️ Vakit yüklenemedi</span>`;
         }
     }
+}
 
-    function renderTimes() {
-        prayers.forEach((t, i) => {
-            const el = document.getElementById(`t${i}`);
-            if (el) el.innerText = t || '--:--';
-        });
+function renderAll(hijri, miladi) {
+    // Vakitler
+    prayers.forEach((t, i) => {
+        const el = document.getElementById(`t${i}`);
+        if (el) el.innerText = t;
+    });
+
+    // Hicri tarih — doğrudan API'den gelen "9 Zilkade 1447"
+    if (hijri) {
+        document.getElementById('hicri-date').innerText = hijri;
     }
 
-    function engine() {
-        if (prayers.length < 6 || !prayers[0]) return;
-        const now = new Date();
-        const curSecs = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
-        const parseToSecs = (s) => {
-            const [h, m] = s.split(':').map(Number);
-            return (h * 3600) + (m * 60);
+    // Miladi tarih — API'den gelen "26 Nisan 2026 Pazar"
+    // Saat gerçek zamanlı gösterildiği için miladi'yi updateClocks() yönetir,
+    // ama API'den gün adını da almış oluyoruz (yedek olarak saklanır).
+}
+
+// ── Geri sayım motoru ─────────────────────────────────────────────
+function engine() {
+    if (!prayers.length || !prayers[0] || prayers[0] === '--:--') return;
+    const now = new Date();
+    const cur = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    const toS = s => { const [h, m] = s.split(':').map(Number); return h * 3600 + m * 60; };
+    const secs = prayers.map(toS);
+
+    let ai = -1;
+    for (let i = 0; i < 6; i++) { if (cur >= secs[i]) ai = i; }
+    if (ai === -1) ai = 5;
+
+    document.querySelectorAll('.vakit-card').forEach((c, i) => c.classList.toggle('active', i === ai));
+
+    const ni = (ai + 1) % 6;
+    let diff = secs[ni] - cur;
+    if (diff < 0) diff += 86400;
+
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    const s = diff % 60;
+    const pad = n => String(n).padStart(2, '0');
+
+    const lbl = vakitNames[ni] === 'Güneş'
+        ? 'Güneşin Doğmasına Kalan Süre:'
+        : `${vakitNames[ni]} Vaktine Kalan Süre:`;
+
+    document.getElementById('status-display').innerHTML =
+        `${lbl}<span class="countdown-timer">${pad(h)}:${pad(m)}:${pad(s)}</span>`;
+}
+
+// ── Hava durumu ───────────────────────────────────────────────────
+function wxDesc(code, isDay) {
+    if (code <= 1) return isDay ? 'Güneşli' : 'Açık Gökyüzü';
+    return ({
+        2:'Az Bulutlu', 3:'Bulutlu', 45:'Sisli', 48:'Kırağı',
+        51:'Hafif Çiseleme', 53:'Çiseleme', 55:'Yoğun Çiseleme',
+        61:'Hafif Yağmur', 63:'Yağmurlu', 65:'Yoğun Yağmur',
+        71:'Hafif Kar', 73:'Kar', 75:'Yoğun Kar',
+        80:'Sağanak', 81:'Kuvvetli Sağanak', 82:'Şiddetli Sağanak',
+        95:'Gök Gürültülü', 96:'Dolu', 99:'Şiddetli Dolu'
+    })[code] ?? 'Parçalı Bulutlu';
+}
+
+async function updateWeather() {
+    // Her zaman önce API'yi dene
+    try {
+        const res = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+            `&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day`
+        );
+        const d = (await res.json()).current;
+        const w = {
+            temp: Math.round(d.temperature_2m),
+            feel: Math.round(d.apparent_temperature),
+            hum:  d.relative_humidity_2m,
+            wind: Math.round(d.wind_speed_10m),
+            pres: Math.round(d.surface_pressure),
+            desc: wxDesc(d.weather_code, d.is_day === 1),
+            at:   Date.now()
         };
-        const minsInSecs = prayers.map(parseToSecs);
-        
-        let activeIdx = -1;
-        for (let i = 0; i < 6; i++) { if (curSecs >= minsInSecs[i]) activeIdx = i; }
-        if (activeIdx === -1) activeIdx = 5;
-        
-        document.querySelectorAll('.vakit-card').forEach((c, i) => {
-            c.classList.toggle('active', i === activeIdx);
-        });
-        
-        let nextIdx = (activeIdx + 1) % 6;
-        let diff = minsInSecs[nextIdx] - curSecs;
-        if (diff < 0) diff += 86400;
-        
-        const h = Math.floor(diff / 3600);
-        const m = Math.floor((diff % 3600) / 60);
-        const s = diff % 60;
-        
-        const nextVakitName = vakitNames[nextIdx];
-        let labelText = `${nextVakitName} Vaktine Kalan Süre:`;
-        if (nextVakitName === "Güneş") {
-            labelText = "Güneşin Doğmasına Kalan Süre:";
-        }
-        
-        document.getElementById('status-display').innerHTML = `${labelText} <span class="countdown-timer">${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}</span>`;
-    }
-
-    function translateWeather(code, isDay) {
-        // 0 ve 1 kodları açık havayı temsil eder
-        if (code <= 1) return isDay ? "Güneşli" : "Açık Gökyüzü";
-        
-        const codes = {
-            2: "Az Bulutlu", 3: "Bulutlu",
-            45: "Sisli", 48: "Kırağı Oluşumu",
-            51: "Hafif Çiseleme", 53: "Çiseleme", 55: "Yoğun Çiseleme",
-            61: "Hafif Yağmurlu", 63: "Yağmurlu", 65: "Yoğun Yağmurlu",
-            71: "Hafif Kar Yağışlı", 73: "Kar Yağışlı", 75: "Yoğun Kar Yağışlı",
-            80: "Sağanak Yağışlı", 81: "Kuvvetli Sağanak", 82: "Şiddetli Sağanak",
-            95: "Gök Gürültülü Sağanak", 96: "Dolu Yağışlı", 99: "Şiddetli Dolu"
-        };
-        return codes[code] || "Parçalı Bulutlu";
-    }
-
-    async function updateWeather() {
+        try { localStorage.setItem(WEATHER_KEY, JSON.stringify(w)); } catch(_) {}
+        renderWeather(w);
+    } catch(e) {
+        console.error('Hava durumu hatası:', e);
+        // API başarısız olursa cache'e bak
         try {
-            const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day`);
-            const d = await res.json();
-            const c = d.current;
-            document.getElementById('w-temp').innerText = Math.round(c.temperature_2m) + "°C";
-            document.getElementById('w-feel').innerText = Math.round(c.apparent_temperature) + "°C";
-            document.getElementById('w-hum').innerText  = c.relative_humidity_2m + "%";
-            document.getElementById('w-wind').innerText = Math.round(c.wind_speed_10m) + " km/sa";
-            document.getElementById('w-pres').innerText = Math.round(c.surface_pressure) + " hPa";
-            // Gündüz/Gece bilgisini fonksiyona gönderiyoruz
-            document.getElementById('w-desc').innerText = translateWeather(c.weather_code, c.is_day === 1);
-        } catch (e) { console.error("Hava durumu hatası"); }
+            const w = JSON.parse(localStorage.getItem(WEATHER_KEY));
+            if (w) renderWeather(w);
+        } catch(_) {}
     }
+}
 
-    function updateClocks() {
-        const now = new Date();
-        document.getElementById('clock').innerText = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('miladi-date').innerText = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', weekday: 'long' });
-        try {
-            const hicriFormatter = new Intl.DateTimeFormat('tr-TR-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('hicri-date').innerText = hicriFormatter.format(now);
-        } catch(e) { document.getElementById('hicri-date').innerText = ""; }
-    }
+function renderWeather(w) {
+    document.getElementById('w-temp').innerText = w.temp + '°C';
+    document.getElementById('w-feel').innerText = w.feel + '°C';
+    document.getElementById('w-hum').innerText  = w.hum  + '%';
+    document.getElementById('w-wind').innerText = w.wind + ' km/sa';
+    document.getElementById('w-pres').innerText = w.pres + ' hPa';
+    document.getElementById('w-desc').innerText = w.desc;
+}
 
-    setInterval(() => { updateClocks(); engine(); }, 1000);
-    setInterval(loadData, 3600000);
-    setInterval(updateWeather, 900000);
-    
-    updateClocks(); 
-    loadData(); 
-    updateWeather();
+// ── Saat & miladi tarih (her saniye güncellenir) ──────────────────
+function updateClocks() {
+    const now = new Date();
+    document.getElementById('clock').innerText =
+        now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('miladi-date').innerText =
+        now.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+
+// ── Başlat ────────────────────────────────────────────────────────
+updateClocks();
+loadData();
+updateWeather();
+
+setInterval(() => { updateClocks(); engine(); }, 1000);
+setInterval(loadData,      60 * 60 * 1000); // saatbaşı API → hata varsa cache
+setInterval(updateWeather, WEATHER_TTL);     // 15 dakikada bir API → hata varsa cache
 </script>
-
 </body>
 </html>
