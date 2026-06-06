@@ -31,15 +31,15 @@
         }
 
         .main-container {
-            width: 96vw;
-            height: 94vh;
+            width: 98vw;
+            height: 98vh;
             display: grid;
-            grid-template-columns: 1fr 1.5fr;
+            grid-template-columns: 1.3fr 1.5fr;
             grid-template-rows: auto 1fr auto;
-            gap: 30px;
+            gap: 20px;
             background: var(--glass);
             border-radius: 24px;
-            padding: 40px;
+            padding: 20px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
 
@@ -61,36 +61,36 @@
             padding-bottom: 20px;
         }
 
-        .logo-area { display: flex; align-items: center; gap: 30px; }
+        .logo-area { display: flex; align-items: center; gap: 20px; }
         .logo-area img { height: 120px; }
-        .logo-area h1 { font-size: 3.8rem; color: var(--primary); font-weight: 800; letter-spacing: -1px; }
+        .logo-area h1 { font-size: 4.5rem; color: var(--primary); font-weight: 800; letter-spacing: -1px; }
 
-        .header-right-group { display: flex; align-items: center; gap: 40px; }
+        .header-right-group { display: flex; align-items: center; gap: 20px; }
 
         .date-area { text-align: right; }
-        .date-area .miladi { font-size: 1.6rem; font-weight: bold; }
-        .date-area .hicri  { color: var(--primary); font-size: 1.4rem; font-weight: 600; margin-top: 5px; }
+        .date-area .miladi { font-size: 2.1rem; font-weight: bold; }
+        .date-area .hicri  { color: var(--primary); font-size: 2.1rem; font-weight: 600; margin-top: 5px; }
 
         .live-clock {
-            font-size: 5rem;
+            font-size: 6rem;
             font-weight: 900;
             color: var(--primary);
-            line-height: 1;
+            line-height: 1.7;
             border-left: 4px solid #eee;
-            padding-left: 35px;
+            padding-left: 20px;
         }
 
         .vakitler-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 20px;
+            gap: 15px;
             grid-column: 1 / -1;
             height: 100%;
         }
 
         .vakit-card {
             background: #f8f9fa;
-            padding: 30px 20px;
+            padding: 20px 20px;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -109,8 +109,8 @@
             border: none;
         }
 
-        .vakit-card .label { font-size: 1.8rem; text-transform: uppercase; margin-bottom: 15px; font-weight: 700; opacity: 0.9; }
-        .vakit-card .time  { font-size: 4rem; font-weight: 800; }
+        .vakit-card .label { font-size: 3.8rem; text-transform: uppercase; margin-bottom: 15px; font-weight: 700; opacity: 0.9; }
+        .vakit-card .time  { font-size: 5.2rem; font-weight: 800; }
 
         .countdown-box {
             background: #e0f2f1;
@@ -119,13 +119,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 30px;
+            padding: 20px;
         }
 
-        #status-display { font-size: 2rem; font-weight: 700; text-align: center; }
+        #status-display { font-size: 3rem; font-weight: 700; text-align: center; }
 
         .countdown-timer {
-            font-size: 5.5rem;
+            font-size: 7.5rem;
             font-weight: 900;
             color: var(--primary);
             font-variant-numeric: tabular-nums;
@@ -146,14 +146,14 @@
         }
 
         .weather-main { text-align: center; }
-        .weather-main .temp { font-size: 4.8rem; font-weight: bold; color: var(--primary); margin: 5px 0; }
-        #w-desc { font-size: 1.6rem; font-weight: 600; color: #555; text-transform: capitalize; }
+        .weather-main .temp { font-size: 5.5rem; font-weight: bold; color: var(--primary); margin: 5px 0; }
+        #w-desc { font-size: 2.2rem; font-weight: 600; color: #555; text-transform: capitalize; }
 
         .weather-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            font-size: 1.6rem; /* vorher: 1.3rem → jetzt größer */
+            font-size: 2.0rem; /* vorher: 1.3rem → jetzt größer */
             border-left: 2px solid #eee;
             padding-left: 30px;
         }
@@ -471,3 +471,4 @@ setInterval(updateWeather, WEATHER_TTL);
 </script>
 </body>
 </html>
+
