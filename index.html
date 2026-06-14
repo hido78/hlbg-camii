@@ -11,9 +11,7 @@
             --glass: rgba(255, 255, 255, 0.95);
             --text: #2c3e50;
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: linear-gradient(135deg, #004d40 0%, #00251a 100%);
@@ -24,12 +22,10 @@
             align-items: center;
             overflow: hidden;
         }
-
         /* Mauszeiger ausblenden */
         body.cursor-hidden * {
             cursor: none !important;
         }
-
         .main-container {
             width: 98vw;
             height: 98vh;
@@ -42,7 +38,6 @@
             padding: 20px;
             box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
-
         @media (max-aspect-ratio: 1/1) {
             .main-container {
                 grid-template-columns: 1fr;
@@ -51,35 +46,34 @@
                 overflow-y: auto;
             }
         }
-
         .header {
             grid-column: 1 / -1;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Trennt Logo links und Uhr/Datum rechts */
             align-items: center;
             border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
+            padding-bottom: 10px;
         }
-
         .logo-area { display: flex; align-items: center; gap: 20px; }
-        .logo-area img { height: 120px; }
-        .logo-area h1 { font-size: 4.5rem; color: var(--primary); font-weight: 800; letter-spacing: -1px; }
-
-        .header-right-group { display: flex; align-items: center; gap: 20px; }
-
-        .date-area { text-align: right; }
-        .date-area .miladi { font-size: 2.1rem; font-weight: bold; }
-        .date-area .hicri  { color: var(--primary); font-size: 2.1rem; font-weight: 600; margin-top: 5px; }
-
+        .logo-area img { height: 140px; }
+        .logo-area h1 { font-size: 4.9rem; color: var(--primary); font-weight: 800; letter-spacing: -1px; }
+        
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Alles rechtsbündig ausrichten */
+            gap: 2px; /* Minimaler Abstand zwischen den Zeilen */
+        }
+        .header-right .miladi { font-size: 2.1rem; font-weight: bold; }
+        .header-right .hicri  { color: var(--primary); font-size: 2.1rem; font-weight: bold; }
+        
         .live-clock {
-            font-size: 6rem;
+            font-size: 7rem;
             font-weight: 900;
             color: var(--primary);
-            line-height: 1.7;
-            border-left: 4px solid #eee;
-            padding-left: 20px;
+            line-height: 1; /* Enge Zeilenhöhe, um ungenutzten Raum zu eliminieren */
         }
-
+        
         .vakitler-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -87,7 +81,6 @@
             grid-column: 1 / -1;
             height: 100%;
         }
-
         .vakit-card {
             background: #f8f9fa;
             padding: 20px 10px;
@@ -100,7 +93,6 @@
             transition: all 0.3s ease;
             border: 2px solid #ddd;
         }
-
         .vakit-card.active {
             background: var(--primary);
             color: white;
@@ -108,10 +100,8 @@
             box-shadow: 0 15px 30px rgba(0,0,0,0.2);
             border: none;
         }
-
         .vakit-card .label { font-size: 3.7rem; text-transform: uppercase; margin-bottom: 15px; font-weight: 700; opacity: 0.9; }
         .vakit-card .time  { font-size: 5.3rem; font-weight: 800; }
-
         .countdown-box {
             background: #e0f2f1;
             border-radius: 24px;
@@ -121,9 +111,7 @@
             align-items: center;
             padding: 20px;
         }
-
         #status-display { font-size: 3rem; font-weight: 700; text-align: center; }
-
         .countdown-timer {
             font-size: 7.5rem;
             font-weight: 900;
@@ -133,7 +121,6 @@
             margin-top: 15px;
             line-height: 1;
         }
-
         .weather-box {
             background: #fff;
             border-radius: 24px;
@@ -144,38 +131,32 @@
             align-items: center;
             gap: 20px;
         }
-
         .weather-main { text-align: center; }
         .weather-main .temp { font-size: 5.5rem; font-weight: bold; color: var(--primary); margin: 5px 0; }
         #w-desc { font-size: 2.2rem; font-weight: 600; color: #555; text-transform: capitalize; }
-
         .weather-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
-            font-size: 2.0rem; /* vorher: 1.3rem → jetzt größer */
+            font-size: 2.0rem; 
             border-left: 2px solid #eee;
             padding-left: 30px;
         }
-
         .w-item { display: flex; flex-direction: column; gap: 5px; }
         .w-item span:first-child { font-weight: bold; color: #777; }
     </style>
 </head>
 <body>
-
 <div class="main-container">
     <header class="header">
         <div class="logo-area">
             <img src="https://upload.wikimedia.org/wikipedia/de/6/62/DITIB-Logo.svg" alt="DİTİB">
             <h1>Hohenlimburg Camii</h1>
         </div>
-        <div class="header-right-group">
-            <div class="date-area">
-                <div class="miladi" id="miladi-date">-- --- ----</div>
-                <div class="hicri"  id="hicri-date">-- --- ----</div>
-            </div>
+        <div class="header-right">
             <div class="live-clock" id="clock">00:00</div>
+            <div class="miladi" id="miladi-date">-- --- ----</div>
+            <div class="hicri"  id="hicri-date">-- --- ----</div>
         </div>
     </header>
 
@@ -187,11 +168,11 @@
         <div class="vakit-card"><div class="label">Akşam</div> <div class="time" id="t4">--:--</div></div>
         <div class="vakit-card"><div class="label">Yatsı</div> <div class="time" id="t5">--:--</div></div>
     </div>
-
+    
     <div class="countdown-box">
         <div id="status-display">Yükleniyor...</div>
     </div>
-
+    
     <div class="weather-box">
         <div class="weather-main">
             <div style="font-size:2.4rem;font-weight:600;">Hava Durumu</div>
@@ -249,7 +230,6 @@ function cachedToken() {
         return r;
     } catch(_) { return null; }
 }
-
 async function login() {
     const res = await fetch(`${BASE}/Auth/Login`, {
         method: 'POST',
@@ -266,7 +246,6 @@ async function login() {
     saveToken(tok);
     return tok;
 }
-
 async function doRefresh(rt) {
     const res = await fetch(`${BASE}/Auth/RefreshToken/${encodeURIComponent(rt)}`, {
         headers: { 'Accept': 'application/json' }
@@ -281,7 +260,6 @@ async function doRefresh(rt) {
     saveToken(tok);
     return tok;
 }
-
 async function getToken() {
     const c = cachedToken();
     if (c) return c;
@@ -315,10 +293,9 @@ async function fetchPrayer() {
     });
     if (!res.ok) throw new Error('PrayerTime HTTP ' + res.status);
     const data = await res.json();
-
     const payload = data?.data ?? data;
     const d = Array.isArray(payload) ? payload[0] : payload;
-
+    
     const times = [
         hhmm(d.fajr),
         hhmm(d.sunrise),
@@ -328,11 +305,11 @@ async function fetchPrayer() {
         hhmm(d.isha)
     ];
     if (times.some(t => !t)) throw new Error('Eksik vakit alanı');
-
+    
     const hijri = d.hijriDateLong ?? d.hijriDateShort ?? '';
     const miladi = d.gregorianDateLong ?? '';
     const gregorianShort = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'numeric', year:'numeric' });
-
+    
     savePrayer({ times, hijri, miladi, gregorianShort });
     return { times, hijri, miladi };
 }
@@ -354,7 +331,7 @@ async function loadData() {
                 }
             }
         } catch(_) {
-            document.getElementById('status-display').innerHTML =
+            document.getElementById('status-display').innerHTML = 
                 `<span style="color:#c00;font-size:1.3rem">⚠️ Vakit yüklenemedi</span>`;
         }
     }
@@ -365,7 +342,6 @@ function renderAll(hijri, miladi) {
         const el = document.getElementById(`t${i}`);
         if (el) el.innerText = t;
     });
-
     if (hijri) {
         document.getElementById('hicri-date').innerText = hijri;
     }
@@ -374,31 +350,33 @@ function renderAll(hijri, miladi) {
 // ── Geri sayım motoru ─────────────────────────────────────────────
 function engine() {
     if (!prayers.length || !prayers[0] || prayers[0] === '--:--') return;
+    
     const now = new Date();
     const cur = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    
     const toS = s => { const [h, m] = s.split(':').map(Number); return h * 3600 + m * 60; };
     const secs = prayers.map(toS);
-
+    
     let ai = -1;
     for (let i = 0; i < 6; i++) { if (cur >= secs[i]) ai = i; }
     if (ai === -1) ai = 5;
-
+    
     document.querySelectorAll('.vakit-card').forEach((c, i) => c.classList.toggle('active', i === ai));
-
+    
     const ni = (ai + 1) % 6;
     let diff = secs[ni] - cur;
     if (diff < 0) diff += 86400;
-
+    
     const h = Math.floor(diff / 3600);
     const m = Math.floor((diff % 3600) / 60);
     const s = diff % 60;
     const pad = n => String(n).padStart(2, '0');
-
-    const lbl = vakitNames[ni] === 'Güneş'
-        ? 'Güneşin Doğmasına Kalan Süre:'
+    
+    const lbl = vakitNames[ni] === 'Güneş' 
+        ? 'Güneşin Doğmasına Kalan Süre:' 
         : `${vakitNames[ni]} Vaktine Kalan Süre:`;
-
-    document.getElementById('status-display').innerHTML =
+        
+    document.getElementById('status-display').innerHTML = 
         `${lbl}<span class="countdown-timer">${pad(h)}:${pad(m)}:${pad(s)}</span>`;
 }
 
@@ -422,6 +400,7 @@ async function updateWeather() {
             `&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day`
         );
         const d = (await res.json()).current;
+        
         const w = {
             temp: Math.round(d.temperature_2m),
             feel: Math.round(d.apparent_temperature),
@@ -431,6 +410,7 @@ async function updateWeather() {
             desc: wxDesc(d.weather_code, d.is_day === 1),
             at:   Date.now()
         };
+        
         try { localStorage.setItem(WEATHER_KEY, JSON.stringify(w)); } catch(_) {}
         renderWeather(w);
     } catch(e) {
@@ -454,9 +434,9 @@ function renderWeather(w) {
 // ── Saat & miladi tarih (her saniye güncellenir) ──────────────────
 function updateClocks() {
     const now = new Date();
-    document.getElementById('clock').innerText =
+    document.getElementById('clock').innerText = 
         now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('miladi-date').innerText =
+    document.getElementById('miladi-date').innerText = 
         now.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 }
 
@@ -471,4 +451,3 @@ setInterval(updateWeather, WEATHER_TTL);
 </script>
 </body>
 </html>
-
