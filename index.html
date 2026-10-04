@@ -22,7 +22,6 @@
             align-items: center;
             overflow: hidden;
         }
-        /* Mauszeiger ausblenden */
         body.cursor-hidden * {
             cursor: none !important;
         }
@@ -174,11 +173,13 @@
     </header>
     
     <div class="vakitler-grid">
+        <!-- İmsak & Güneş (Teilen sich Zelle Index 0) -->
         <div class="vakit-card">
             <div class="label">İmsak</div> 
             <div class="time" id="t0">--:--</div>
             <div style="position: absolute; bottom: 15px; left: 0; right: 0; font-size: 2.2rem; font-weight: 700; opacity: 0.85;">Güneş: <span id="t1">--:--</span></div>
         </div>
+        <!-- Versteckte Zelle (Index 1) bleibt für Grid-Struktur erhalten -->
         <div class="vakit-card" style="display: none;"></div>
         
         <div class="vakit-card"><div class="label">Öğle</div>  <div class="time" id="t2">--:--</div></div>
@@ -207,7 +208,7 @@
 </div>
 
 <script>
-// ── Mauszeiger nach 1 Sekunde Inaktivität ausblenden ──────────────
+// ── Mauszeiger ausblenden ─────────────────────────────────────────
 let cursorTimer;
 function resetCursorTimer() {
     document.body.classList.remove('cursor-hidden');
@@ -220,100 +221,48 @@ document.addEventListener('mousemove', resetCursorTimer);
 document.addEventListener('mousedown', resetCursorTimer);
 resetCursorTimer();
 
-// ── Sabitler ──────────────────────────────────────────────────────
+// ── Konfiguration ─────────────────────────────────────────────────
 const LAT = 51.3508, LON = 7.5683;
-const CITY_ID = 10028;
-const BASE  = 'https://awqatsalah.diyanet.gov.tr';
-const EMAIL = 'kahraman.atmaca@hotmail.de';
-const PASS  = '7bF+M9#j';
-
-const TOKEN_KEY   = 'diy-token-v1';
+// NEUE PROXY-URL EINGETRAGEN
+const PROXY_URL   = 'https://namaz-vakitleri.ditib-hohenlimburg.workers.dev/'; 
 const PRAYER_KEY  = 'diy-prayer-v6';
-const PRAYER_TTL  = 12 * 60 * 60 * 1000;
 const WEATHER_KEY = 'diy-weather-v1';
-const WEATHER_TTL = 15 * 60 * 1000; // 15 dakika
-
+const WEATHER_TTL = 15 * 60 * 1000;
 const vakitNames = ['İmsak', 'Güneş', 'Öğle', 'İkindi', 'Akşam', 'Yatsı'];
 let prayers = [];
 
-// ── Token ─────────────────────────────────────────────────────────
-function saveToken(tok) {
-    try { localStorage.setItem(TOKEN_KEY, JSON.stringify({ ...tok, at: Date.now() })); } catch(_) {}
-}
-function cachedToken() {
-    try {
-        const r = JSON.parse(localStorage.getItem(TOKEN_KEY));
-        if (!r?.accessToken) return null;
-        if (Date.now() - r.at > 55 * 60 * 1000) return null;
-        return r;
-    } catch(_) { return null; }
-}
-async function login() {
-    const res = await fetch(`${BASE}/Auth/Login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ email: EMAIL, password: PASS })
-    });
-    if (!res.ok) throw new Error('Login HTTP ' + res.status);
-    const d = await res.json();
-    const tok = {
-        accessToken:  d?.data?.accessToken  ?? d?.accessToken,
-        refreshToken: d?.data?.refreshToken ?? d?.refreshToken
-    };
-    if (!tok.accessToken) throw new Error('Token alınamadı');
-    saveToken(tok);
-    return tok;
-}
-async function doRefresh(rt) {
-    const res = await fetch(`${BASE}/Auth/RefreshToken/${encodeURIComponent(rt)}`, {
-        headers: { 'Accept': 'application/json' }
-    });
-    if (!res.ok) throw new Error('Refresh HTTP ' + res.status);
-    const d = await res.json();
-    const tok = {
-        accessToken:  d?.data?.accessToken  ?? d?.accessToken,
-        refreshToken: d?.data?.refreshToken ?? d?.refreshToken ?? rt
-    };
-    if (!tok.accessToken) throw new Error('Refresh token yok');
-    saveToken(tok);
-    return tok;
-}
-async function getToken() {
-    const c = cachedToken();
-    if (c) return c;
-    try {
-        const raw = JSON.parse(localStorage.getItem(TOKEN_KEY));
-        if (raw?.refreshToken) return await doRefresh(raw.refreshToken);
-    } catch(_) {}
-    return await login();
-}
-
-// ── HH:MM normalize ───────────────────────────────────────────────
 function hhmm(v) {
     if (!v) return null;
     const m = String(v).match(/(\d{1,2}):(\d{2})/);
     return m ? `${m[1].padStart(2,'0')}:${m[2]}` : null;
 }
 
-// ── Namaz vakitleri cache ─────────────────────────────────────────
 function savePrayer(data) {
     try { localStorage.setItem(PRAYER_KEY, JSON.stringify({ ...data, at: Date.now() })); } catch(_) {}
 }
 
-// ── API'den çek ───────────────────────────────────────────────────
+// ── Vakitleri Proxy Üzerinden Çek ─────────────────────────────────
 async function fetchPrayer() {
-    const tok = await getToken();
-    const res = await fetch(`${BASE}/api/PrayerTime/Daily/${CITY_ID}`, {
-        headers: {
-            'Authorization': `Bearer ${tok.accessToken}`,
-            'Accept': 'application/json'
-        }
-    });
-    if (!res.ok) throw new Error('PrayerTime HTTP ' + res.status);
+    const res = await fetch(PROXY_URL);
+    if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
     const data = await res.json();
     const payload = data?.data ?? data;
-    const d = Array.isArray(payload) ? payload[0] : payload;
     
+    let d = null;
+    if (Array.isArray(payload)) {
+        // Erstellt das heutige Datum exakt im Diyanet-Format (z.B. "04.10.2026")
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const todayStr = `${day}.${month}.${year}`;
+
+        // Sucht exakt den Eintrag für heute aus der Wochenliste heraus
+        d = payload.find(item => item.gregorianDateShort === todayStr) || payload[0];
+    } else {
+        d = payload;
+    }
+
     const times = [
         hhmm(d.fajr),
         hhmm(d.sunrise),
@@ -326,14 +275,24 @@ async function fetchPrayer() {
     
     const hijri = d.hijriDateLong ?? d.hijriDateShort ?? '';
     const miladi = d.gregorianDateLong ?? '';
-    const gregorianShort = new Date().toLocaleDateString('tr-TR', { day:'numeric', month:'numeric', year:'numeric' });
+    const dateStr = new Date().toDateString(); 
     
-    savePrayer({ times, hijri, miladi, gregorianShort });
+    savePrayer({ times, hijri, miladi, dateStr }); 
     return { times, hijri, miladi };
 }
 
 async function loadData() {
     try {
+        const raw = localStorage.getItem(PRAYER_KEY);
+        if (raw) {
+            const c = JSON.parse(raw);
+            if (c?.dateStr === new Date().toDateString() && c?.times?.length === 6) {
+                prayers = c.times;
+                renderAll(c.hijri, c.miladi);
+                return;
+            }
+        }
+
         const r = await fetchPrayer();
         prayers = r.times;
         renderAll(r.hijri, r.miladi);
@@ -365,7 +324,7 @@ function renderAll(hijri, miladi) {
     }
 }
 
-// ── Geri sayım motoru ─────────────────────────────────────────────
+// ── Geri Sayım Motoru & Highlighting ──────────────────────────────
 function engine() {
     if (!prayers.length || !prayers[0] || prayers[0] === '--:--') return;
     
@@ -375,11 +334,25 @@ function engine() {
     const toS = s => { const [h, m] = s.split(':').map(Number); return h * 3600 + m * 60; };
     const secs = prayers.map(toS);
     
-    let ai = -1;
+    let ai = -1; // ai ist der Index der aktuellen Gebetszeit (0 = İmsak, 1 = Güneş, 2 = Öğle...)
     for (let i = 0; i < 6; i++) { if (cur >= secs[i]) ai = i; }
     if (ai === -1) ai = 5;
     
-    document.querySelectorAll('.vakit-card').forEach((c, i) => c.classList.toggle('active', i === ai));
+    // Zuweisung der "active" Klasse an die korrekte Zelle
+    document.querySelectorAll('.vakit-card').forEach((c, i) => {
+        let isActive = false;
+        
+        // Wenn es İmsak (0) oder Güneş (1) ist, markiere die GEMEINSAME erste Zelle (Index 0)
+        if (ai === 0 || ai === 1) {
+            if (i === 0) isActive = true;
+        } 
+        // Ansonsten markiere die exakt passende Zelle
+        else {
+            if (i === ai) isActive = true;
+        }
+        
+        c.classList.toggle('active', isActive);
+    });
     
     const ni = (ai + 1) % 6;
     let diff = secs[ni] - cur;
@@ -398,7 +371,7 @@ function engine() {
         `${lbl}<span class="countdown-timer">${pad(h)}:${pad(m)}:${pad(s)}</span>`;
 }
 
-// ── Hava durumu ───────────────────────────────────────────────────
+// ── Hava Durumu ───────────────────────────────────────────────────
 function wxDesc(code, isDay) {
     if (code <= 1) return isDay ? 'Güneşli' : 'Açık Gökyüzü';
     return ({
@@ -410,7 +383,6 @@ function wxDesc(code, isDay) {
         95:'Gök Gürültülü', 96:'Dolu', 99:'Şiddetli Dolu'
     })[code] ?? 'Parçalı Bulutlu';
 }
-
 async function updateWeather() {
     try {
         const res = await fetch(
@@ -439,7 +411,6 @@ async function updateWeather() {
         } catch(_) {}
     }
 }
-
 function renderWeather(w) {
     document.getElementById('w-temp').innerText = w.temp + '°C';
     document.getElementById('w-feel').innerText = w.feel + '°C';
@@ -449,7 +420,6 @@ function renderWeather(w) {
     document.getElementById('w-desc').innerText = w.desc;
 }
 
-// ── Saat & miladi tarih (her saniye güncellenir) ──────────────────
 function updateClocks() {
     const now = new Date();
     document.getElementById('clock').innerText = 
@@ -458,14 +428,25 @@ function updateClocks() {
         now.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 }
 
-// ── Başlat ────────────────────────────────────────────────────────
+// ── Start ─────────────────────────────────────────────────────────
 updateClocks();
 loadData();
 updateWeather();
 
 setInterval(() => { updateClocks(); engine(); }, 1000);
-setInterval(loadData,      60 * 60 * 1000);
 setInterval(updateWeather, WEATHER_TTL);
+
+function scheduleMidnightFetch() {
+    const now = new Date();
+    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 1, 0);
+    const msUntilMidnight = nextMidnight - now;
+    
+    setTimeout(() => {
+        loadData();
+        scheduleMidnightFetch();
+    }, msUntilMidnight);
+}
+scheduleMidnightFetch();
 </script>
 </body>
 </html>
