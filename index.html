@@ -196,18 +196,16 @@
     
     <div class="vakitler-grid">
         <!-- İmsak & Güneş (Teilen sich Zelle Index 0) -->
-        <div class="vakit-card">
+        <div class="vakit-card" data-card-index="0">
             <div class="label">İmsak</div> 
             <div class="time" id="t0">--:--</div>
             <div style="position: absolute; bottom: 15px; left: 0; right: 0; font-size: 2.2rem; font-weight: 700; opacity: 0.85;">Güneş: <span id="t1">--:--</span></div>
         </div>
-        <!-- Versteckte Zelle (Index 1) bleibt für Grid-Struktur erhalten -->
-        <div class="vakit-card" style="display: none;"></div>
         
-        <div class="vakit-card"><div class="label">Öğle</div>  <div class="time" id="t2">--:--</div></div>
-        <div class="vakit-card"><div class="label">İkindi</div><div class="time" id="t3">--:--</div></div>
-        <div class="vakit-card"><div class="label">Akşam</div> <div class="time" id="t4">--:--</div></div>
-        <div class="vakit-card"><div class="label">Yatsı</div> <div class="time" id="t5">--:--</div></div>
+        <div class="vakit-card" data-card-index="2"><div class="label">Öğle</div>  <div class="time" id="t2">--:--</div></div>
+        <div class="vakit-card" data-card-index="3"><div class="label">İkindi</div><div class="time" id="t3">--:--</div></div>
+        <div class="vakit-card" data-card-index="4"><div class="label">Akşam</div> <div class="time" id="t4">--:--</div></div>
+        <div class="vakit-card" data-card-index="5"><div class="label">Yatsı</div> <div class="time" id="t5">--:--</div></div>
     </div>
     
     <div class="countdown-box">
@@ -245,13 +243,26 @@ resetCursorTimer();
 
 // ── Konfiguration ─────────────────────────────────────────────────
 const LAT = 51.3508, LON = 7.5683;
-// NEUE PROXY-URL EINGETRAGEN
 const PROXY_URL   = 'https://namaz-vakitleri.ditib-hohenlimburg.workers.dev/'; 
 const PRAYER_KEY  = 'diy-prayer-v6';
 const WEATHER_KEY = 'diy-weather-v1';
 const WEATHER_TTL = 15 * 60 * 1000;
+const FETCH_TIMEOUT_MS = 10000;
+const RETRY_DELAY_MS = 5 * 60 * 1000;
 const vakitNames = ['İmsak', 'Güneş', 'Öğle', 'İkindi', 'Akşam', 'Yatsı'];
+
 let prayers = [];
+let currentDayKey = new Date().toDateString();
+let isFetchingPrayer = false;
+let isFetchingWeather = false;
+let retryPrayerTimer = null;
+
+function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+}
 
 function hhmm(v) {
     if (!v) return null;
@@ -263,27 +274,44 @@ function savePrayer(data) {
     try { localStorage.setItem(PRAYER_KEY, JSON.stringify({ ...data, at: Date.now() })); } catch(_) {}
 }
 
+function readCachedPrayer() {
+    try {
+        const raw = localStorage.getItem(PRAYER_KEY);
+        if (!raw) return null;
+        const c = JSON.parse(raw);
+        if (Array.isArray(c?.times) && c.times.length === 6) return c;
+    } catch(_) {}
+    return null;
+}
+
+function schedulePrayerRetry() {
+    clearTimeout(retryPrayerTimer);
+    retryPrayerTimer = setTimeout(() => {
+        loadData(true);
+    }, RETRY_DELAY_MS);
+}
+
 // ── Vakitleri Proxy Üzerinden Çek ─────────────────────────────────
 async function fetchPrayer() {
-    const res = await fetch(PROXY_URL);
+    const res = await fetchWithTimeout(PROXY_URL, { cache: 'no-store' });
     if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
     const data = await res.json();
     const payload = data?.data ?? data;
     
     let d = null;
     if (Array.isArray(payload)) {
-        // Erstellt das heutige Datum exakt im Diyanet-Format (z.B. "04.10.2026")
         const now = new Date();
         const day = String(now.getDate()).padStart(2, '0');
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
         const todayStr = `${day}.${month}.${year}`;
 
-        // Sucht exakt den Eintrag für heute aus der Wochenliste heraus
         d = payload.find(item => item.gregorianDateShort === todayStr) || payload[0];
     } else {
         d = payload;
     }
+
+    if (!d) throw new Error('Boş vakit verisi');
 
     const times = [
         hhmm(d.fajr),
@@ -303,36 +331,42 @@ async function fetchPrayer() {
     return { times, hijri, miladi };
 }
 
-async function loadData() {
+async function loadData(forceFetch = false) {
+    if (isFetchingPrayer) return;
+    isFetchingPrayer = true;
+
+    const todayKey = new Date().toDateString();
+    const cached = readCachedPrayer();
+
     try {
-        const raw = localStorage.getItem(PRAYER_KEY);
-        if (raw) {
-            const c = JSON.parse(raw);
-            if (c?.dateStr === new Date().toDateString() && c?.times?.length === 6) {
-                prayers = c.times;
-                renderAll(c.hijri, c.miladi);
-                return;
-            }
+        if (!forceFetch && cached && cached.dateStr === todayKey) {
+            prayers = cached.times;
+            renderAll(cached.hijri, cached.miladi);
+            clearTimeout(retryPrayerTimer);
+            return;
+        }
+
+        if (cached && !prayers.length) {
+            prayers = cached.times;
+            renderAll(cached.hijri, cached.miladi);
         }
 
         const r = await fetchPrayer();
         prayers = r.times;
         renderAll(r.hijri, r.miladi);
+        clearTimeout(retryPrayerTimer);
     } catch(e) {
         console.error('Vakit yükleme hatası:', e.message);
-        try {
-            const raw = localStorage.getItem(PRAYER_KEY);
-            if (raw) {
-                const c = JSON.parse(raw);
-                if (c?.times?.length === 6) {
-                    prayers = c.times;
-                    renderAll(c.hijri, c.miladi);
-                }
-            }
-        } catch(_) {
+        schedulePrayerRetry();
+        if (cached) {
+            prayers = cached.times;
+            renderAll(cached.hijri, cached.miladi);
+        } else if (!prayers.length) {
             document.getElementById('status-display').innerHTML = 
                 `<span style="color:#c00;font-size:1.3rem">⚠️ Vakit yüklenemedi</span>`;
         }
+    } finally {
+        isFetchingPrayer = false;
     }
 }
 
@@ -343,6 +377,9 @@ function renderAll(hijri, miladi) {
     });
     if (hijri) {
         document.getElementById('hicri-date').innerText = hijri;
+    }
+    if (miladi) {
+        document.getElementById('miladi-date').innerText = miladi;
     }
 }
 
@@ -356,24 +393,13 @@ function engine() {
     const toS = s => { const [h, m] = s.split(':').map(Number); return h * 3600 + m * 60; };
     const secs = prayers.map(toS);
     
-    let ai = -1; // ai ist der Index der aktuellen Gebetszeit (0 = İmsak, 1 = Güneş, 2 = Öğle...)
+    let ai = -1;
     for (let i = 0; i < 6; i++) { if (cur >= secs[i]) ai = i; }
     if (ai === -1) ai = 5;
     
-    // Zuweisung der "active" Klasse an die korrekte Zelle
-    document.querySelectorAll('.vakit-card').forEach((c, i) => {
-        let isActive = false;
-        
-        // Wenn es İmsak (0) oder Güneş (1) ist, markiere die GEMEINSAME erste Zelle (Index 0)
-        if (ai === 0 || ai === 1) {
-            if (i === 0) isActive = true;
-        } 
-        // Ansonsten markiere die exakt passende Zelle
-        else {
-            if (i === ai) isActive = true;
-        }
-        
-        c.classList.toggle('active', isActive);
+    const activeCardIndex = (ai === 0 || ai === 1) ? 0 : ai;
+    document.querySelectorAll('.vakit-card').forEach(c => {
+        c.classList.toggle('active', Number(c.dataset.cardIndex) === activeCardIndex);
     });
     
     const ni = (ai + 1) % 6;
@@ -405,12 +431,35 @@ function wxDesc(code, isDay) {
         95:'Gök Gürültülü', 96:'Dolu', 99:'Şiddetli Dolu'
     })[code] ?? 'Parçalı Bulutlu';
 }
-async function updateWeather() {
+
+function readCachedWeather() {
     try {
-        const res = await fetch(
+        const raw = localStorage.getItem(WEATHER_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch(_) {
+        return null;
+    }
+}
+
+async function updateWeather(force = false) {
+    const cached = readCachedWeather();
+    if (cached && !force) {
+        renderWeather(cached);
+        if (Date.now() - (cached.at || 0) < WEATHER_TTL) {
+            return;
+        }
+    }
+
+    if (isFetchingWeather) return;
+    isFetchingWeather = true;
+
+    try {
+        const res = await fetchWithTimeout(
             `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
-            `&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day`
+            `&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day`,
+            { cache: 'no-store' }
         );
+        if (!res.ok) throw new Error('Weather HTTP ' + res.status);
         const d = (await res.json()).current;
         
         const w = {
@@ -427,12 +476,12 @@ async function updateWeather() {
         renderWeather(w);
     } catch(e) {
         console.error('Hava durumu hatası:', e);
-        try {
-            const w = JSON.parse(localStorage.getItem(WEATHER_KEY));
-            if (w) renderWeather(w);
-        } catch(_) {}
+        if (cached) renderWeather(cached);
+    } finally {
+        isFetchingWeather = false;
     }
 }
+
 function renderWeather(w) {
     document.getElementById('w-temp').innerText = w.temp + '°C';
     document.getElementById('w-feel').innerText = w.feel + '°C';
@@ -444,27 +493,35 @@ function renderWeather(w) {
 
 function updateClocks() {
     const now = new Date();
+    const dayKey = now.toDateString();
+
     document.getElementById('clock').innerText = 
         now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
     document.getElementById('miladi-date').innerText = 
         now.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    if (dayKey !== currentDayKey) {
+        currentDayKey = dayKey;
+        loadData(true);
+    }
 }
 
 // ── Start ─────────────────────────────────────────────────────────
 updateClocks();
-loadData();
-updateWeather();
+loadData(false);
+updateWeather(false);
 
 setInterval(() => { updateClocks(); engine(); }, 1000);
-setInterval(updateWeather, WEATHER_TTL);
+setInterval(() => { updateWeather(true); }, WEATHER_TTL);
 
 function scheduleMidnightFetch() {
     const now = new Date();
     const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 1, 0);
-    const msUntilMidnight = nextMidnight - now;
+    const msUntilMidnight = Math.max(1000, nextMidnight - now);
     
     setTimeout(() => {
-        loadData();
+        currentDayKey = new Date().toDateString();
+        loadData(true);
         scheduleMidnightFetch();
     }, msUntilMidnight);
 }
