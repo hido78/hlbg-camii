@@ -45,7 +45,7 @@
                 overflow-y: auto;
             }
         }
-	.header {
+        .header {
             grid-column: 1 / -1;
             display: grid;
             grid-template-columns: 1fr auto; /* Linke Seite dehnt sich aus, rechte Seite bleibt fest am rechten Rand */
@@ -54,7 +54,6 @@
             padding-bottom: 10px;
             gap: 20px;
             width: 100%;
-            box-sizing: border-box;
         }
         
         .logo-area { 
@@ -245,7 +244,7 @@ resetCursorTimer();
 const LAT = 51.3508, LON = 7.5683;
 const PROXY_URL   = 'https://namaz-vakitleri.ditib-hohenlimburg.workers.dev/'; 
 const PRAYER_KEY  = 'diy-prayer-v6';
-const WEATHER_KEY = 'diy-weather-v1';
+const WEATHER_KEY = 'diy-weather-v2';
 const WEATHER_TTL = 15 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 10000;
 const RETRY_DELAY_MS = 5 * 60 * 1000;
@@ -268,6 +267,15 @@ function hhmm(v) {
     if (!v) return null;
     const m = String(v).match(/(\d{1,2}):(\d{2})/);
     return m ? `${m[1].padStart(2,'0')}:${m[2]}` : null;
+}
+
+function pickTime(obj, keys) {
+    if (!obj || typeof obj !== 'object') return null;
+    for (const k of keys) {
+        const t = hhmm(obj[k]);
+        if (t) return t;
+    }
+    return null;
 }
 
 function savePrayer(data) {
@@ -296,7 +304,7 @@ async function fetchPrayer() {
     const res = await fetchWithTimeout(PROXY_URL, { cache: 'no-store' });
     if (!res.ok) throw new Error('Proxy HTTP ' + res.status);
     const data = await res.json();
-    const payload = data?.data ?? data;
+    const payload = data?.data ?? data?.result ?? data;
     
     let d = null;
     if (Array.isArray(payload)) {
@@ -305,26 +313,36 @@ async function fetchPrayer() {
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const year = now.getFullYear();
         const todayStr = `${day}.${month}.${year}`;
+        const isoToday = `${year}-${month}-${day}`;
 
-        d = payload.find(item => item.gregorianDateShort === todayStr) || payload[0];
+        d = payload.find(item =>
+            item?.gregorianDateShort === todayStr ||
+            item?.date === todayStr ||
+            item?.date === isoToday ||
+            String(item?.gregorianDateLong || '').includes(`${day}.${month}.${year}`)
+        ) || payload[0];
     } else {
-        d = payload;
+        d = payload?.today ?? payload?.vakitler ?? payload;
     }
 
-    if (!d) throw new Error('Boş vakit verisi');
+    if (!d || typeof d !== 'object') throw new Error('Boş vakit verisi');
 
     const times = [
-        hhmm(d.fajr),
-        hhmm(d.sunrise),
-        hhmm(d.dhuhr),
-        hhmm(d.asr),
-        hhmm(d.maghrib),
-        hhmm(d.isha)
+        pickTime(d, ['fajr', 'imsak', 'Fajr', 'Imsak']),
+        pickTime(d, ['sunrise', 'gunes', 'güneş', 'Sunrise', 'Gunes']),
+        pickTime(d, ['dhuhr', 'ogle', 'öğle', 'Dhuhr', 'Ogle']),
+        pickTime(d, ['asr', 'ikindi', 'Asr', 'Ikindi']),
+        pickTime(d, ['maghrib', 'aksam', 'akşam', 'Maghrib', 'Aksam']),
+        pickTime(d, ['isha', 'yatsi', 'yatsı', 'Isha', 'Yatsi'])
     ];
-    if (times.some(t => !t)) throw new Error('Eksik vakit alanı');
+
+    if (times.some(t => !t)) {
+        console.warn('Eksik vakit alanı - gelen kayıt:', d);
+        throw new Error('Eksik vakit alanı');
+    }
     
-    const hijri = d.hijriDateLong ?? d.hijriDateShort ?? '';
-    const miladi = d.gregorianDateLong ?? '';
+    const hijri = d.hijriDateLong ?? d.hijriDateShort ?? d.hicri ?? '';
+    const miladi = d.gregorianDateLong ?? d.miladi ?? '';
     const dateStr = new Date().toDateString(); 
     
     savePrayer({ times, hijri, miladi, dateStr }); 
@@ -378,9 +396,10 @@ function renderAll(hijri, miladi) {
     if (hijri) {
         document.getElementById('hicri-date').innerText = hijri;
     }
-    if (miladi) {
-        document.getElementById('miladi-date').innerText = miladi;
-    }
+    const fallbackMiladi = new Date().toLocaleDateString('tr-TR', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+    document.getElementById('miladi-date').innerText = miladi || fallbackMiladi;
 }
 
 // ── Geri Sayım Motoru & Highlighting ──────────────────────────────
@@ -420,9 +439,15 @@ function engine() {
 }
 
 // ── Hava Durumu ───────────────────────────────────────────────────
-function wxDesc(code, isDay) {
-    if (code <= 1) return isDay ? 'Güneşli' : 'Açık Gökyüzü';
-    return ({
+function wxDesc(code, isDay, precipitation = 0) {
+    const hasPrecip = Number(precipitation) > 0;
+    const isSnowCode = [71, 73, 75, 77, 85, 86].includes(code);
+
+    if (hasPrecip && isSnowCode) return 'Kar';
+    if (hasPrecip && code <= 48) return 'Yağmurlu';
+
+    if (code <= 1) return hasPrecip ? 'Yağmurlu' : (isDay ? 'Güneşli' : 'Açık Gökyüzü');
+    const desc = ({
         2:'Az Bulutlu', 3:'Bulutlu', 45:'Sisli', 48:'Kırağı',
         51:'Hafif Çiseleme', 53:'Çiseleme', 55:'Yoğun Çiseleme',
         61:'Hafif Yağmur', 63:'Yağmurlu', 65:'Yoğun Yağmur',
@@ -430,6 +455,11 @@ function wxDesc(code, isDay) {
         80:'Sağanak', 81:'Kuvvetli Sağanak', 82:'Şiddetli Sağanak',
         95:'Gök Gürültülü', 96:'Dolu', 99:'Şiddetli Dolu'
     })[code] ?? 'Parçalı Bulutlu';
+
+    if (hasPrecip && (desc === 'Az Bulutlu' || desc === 'Bulutlu' || desc === 'Parçalı Bulutlu')) {
+        return 'Yağmurlu';
+    }
+    return desc;
 }
 
 function readCachedWeather() {
@@ -456,7 +486,7 @@ async function updateWeather(force = false) {
     try {
         const res = await fetchWithTimeout(
             `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
-            `&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day`,
+            `&current=temperature_2m,relative_humidity_2m,apparent_temperature,surface_pressure,wind_speed_10m,weather_code,is_day,precipitation`,
             { cache: 'no-store' }
         );
         if (!res.ok) throw new Error('Weather HTTP ' + res.status);
@@ -468,7 +498,7 @@ async function updateWeather(force = false) {
             hum:  d.relative_humidity_2m,
             wind: Math.round(d.wind_speed_10m),
             pres: Math.round(d.surface_pressure),
-            desc: wxDesc(d.weather_code, d.is_day === 1),
+            desc: wxDesc(d.weather_code, d.is_day === 1, d.precipitation),
             at:   Date.now()
         };
         
@@ -497,8 +527,6 @@ function updateClocks() {
 
     document.getElementById('clock').innerText = 
         now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('miladi-date').innerText = 
-        now.toLocaleDateString('tr-TR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
     if (dayKey !== currentDayKey) {
         currentDayKey = dayKey;
@@ -508,6 +536,7 @@ function updateClocks() {
 
 // ── Start ─────────────────────────────────────────────────────────
 updateClocks();
+renderAll('', '');
 loadData(false);
 updateWeather(false);
 
